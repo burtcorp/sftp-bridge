@@ -13,7 +13,7 @@ upload-user() {
   install -o root -g root -m 0755 -d /srv/sshd-chroot/${username}
   useradd -s /sbin/nologin -K UMASK=007 -m -k none \
     -G upload-users -d /${username} ${username}
-  install -o ${username} -g ${username} -m 0750 -d /srv/sshd-chroot/${username}/${username}
+  install -o ${username} -g ${username} -m 0770 -d /srv/sshd-chroot/${username}/${username}
 }
 
 list-userkeys | while read userkey ; do
