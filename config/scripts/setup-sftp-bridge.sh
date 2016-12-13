@@ -9,7 +9,7 @@ die() { echo "$1" ; exit 1 ; }
 [ -n "${SFTPBRIDGE_UPLOAD_PREFIX}" ] || die "Please export SFTPBRIDGE_UPLOAD_PREFIX"
 
 yum -q install -y epel-release
-yum -q install -y --enablerepo=epel jq incron nrpe openssh-server \
+yum -q install -y --enablerepo=epel incron nrpe openssh-server \
   yum-cron-security nagios-plugins-users nagios-plugins-disk
 # Create forwarder user
 id forwarder &> /dev/null || useradd -s /sbin/nologin forwarder
@@ -30,7 +30,7 @@ SFTPBRIDGE_CONFIG_PREFIX=${SFTPBRIDGE_CONFIG_PREFIX}
 SFTPBRIDGE_UPLOAD_PREFIX=${SFTPBRIDGE_UPLOAD_PREFIX}
 " > /etc/sftp-bridge-environment
 chmod 0755 /etc/sftp-bridge-environment
-# Group that allows only chrooted sftp access
+# Group referenced in sshd_config that allows only chrooted sftp access
 groupadd -f upload-users
 # Script to create the individual upload users
 aws s3 cp ${SFTPBRIDGE_CONFIG_PREFIX}/scripts/sync-sftp-uploaders.sh /usr/local/bin/sync-sftp-uploaders
