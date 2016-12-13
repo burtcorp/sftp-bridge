@@ -28,6 +28,7 @@ mkdir -p /etc/ssh/authorized_keys
 echo "SFTPBRIDGE_USER_PREFIX=${SFTPBRIDGE_USER_PREFIX}
 SFTPBRIDGE_CONFIG_PREFIX=${SFTPBRIDGE_CONFIG_PREFIX}
 SFTPBRIDGE_UPLOAD_PREFIX=${SFTPBRIDGE_UPLOAD_PREFIX}
+SFTPBRIDGE_UPLOAD_ROLEARN=${SFTPBRIDGE_UPLOAD_ROLEARN}
 " > /etc/sftp-bridge-environment
 chmod 0755 /etc/sftp-bridge-environment
 # Group referenced in sshd_config that allows only chrooted sftp access

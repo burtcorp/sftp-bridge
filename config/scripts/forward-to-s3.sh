@@ -2,36 +2,40 @@
 
 set -e
 
-# TODO: If there is already an upload of this file ongoing, kill it and restart
-
 die() { logger -st sftp-bridge-forward "$1" ; exit 1 ; }
 
 LOCKDIR=/var/lock/forward-to-s3
 
-while getopts "b:p:" opt ; do
+. /etc/sftp-bridge-environment
+
+while getopts "p:" opt ; do
   case "$opt" in
-    b) S3_PREFIX="$OPTARG" ;;
     p) UPLOADED_PATH="$OPTARG" ;;
     *) die "Unknown parameter $opt" ;;
   esac
 done
 
-[ -n "$S3_PREFIX" ] || die "Missing parameter -b <s3_prefix>"
 [ -n "$UPLOADED_PATH" ] || die "Missing parameter -p <uploaded file>"
 
 uploadfile=$(basename "$UPLOADED_PATH")
 uploadfile=$(echo "$uploadfile" | tr -dC 'A-Za-z0-9_.')
-target=${S3_PREFIX}/${uploadfile}
+target=${SFTPBRIDGE_UPLOAD_PREFIX}/${uploadfile}
 lock=${LOCKDIR}/$(echo "$target" | base64)
 
-sleep 1
+if  [ -n "$SFTPBRIDGE_UPLOAD_ROLEARN" ] ; then
+  assume_args="--role-arn $SFTPBRIDGE_UPLOAD_ROLEARN --role-session-name forward-to-s3 --query Credentials --output text"
+  credentials=($(aws sts assume-role $assume_args))
+  export AWS_ACCESS_KEY_ID="${credentials[0]}"
+  export AWS_SECRET_ACCESS_KEY="${credentials[2]}"
+  export AWS_SESSION_TOKEN="${credentials[3]}"
+fi
 
 if [ -f $lock ] ; then
   pid=$(cat $lock)
   kill $pid || true
   rm $lock
 fi
-trap "rm $lock" SIGTERM EXIT
+trap "rm $lock" SIGTERM SIGINT EXIT
 echo $$ > $lock
 
 retries=10

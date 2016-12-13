@@ -38,7 +38,11 @@ make install hostkeys userkeys AWS='aws --region us-east-1' \
 1. Launch an Amazon EC2 instance from the console or with awscli.
 1. Configure the instance:
 ```
-ssh ec2-user@<ec2-public-ipv4> cat config/scripts/setup-sftp-bridge.sh | ec2-user@<ip> bash -
+ssh ec2-user@<ec2-public-ipv4> export \
+  SFTPBRIDGE_USER_PREFIX=s3://<ze-bucket>/ssh-user-keys \
+  SFTPBRIDGE_CONFIG_PREFIX=s3://<ze-bucket>/config \
+  SFTPBRIDGE_UPLOAD_PREFIX=s3://<ze-bucket>/cmg \
+  cat config/scripts/setup-sftp-bridge.sh | bash -
 ```
 
 ### CloudFormation setup
@@ -72,6 +76,10 @@ make install hostkeys AWS='aws --region us-east-1' \
   }
 }
 ```
+
+## Cross-account access
+
+If the upload bucket and the instance are running in different accounts, you can pass env SFTPBRIDGE_UPLOAD_ROLEARN with a role ARN when setting up the instance to get the forwader to assume a role before uploading the file, e.g. `SFTPBRIDGE_UPLOAD_ROLEARN=arn:aws:iam::<remote-account-id>:role/ExternalUploadRole`.
 
 ## Not implemented
 
