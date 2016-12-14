@@ -8,8 +8,9 @@ LOCKDIR=/var/lock/forward-to-s3
 
 . /etc/sftp-bridge-environment
 
-while getopts "p:" opt ; do
+while getopts "f:p:" opt ; do
   case "$opt" in
+    f) FOLDER_PREFIX="$OPTARG" ;;
     p) UPLOADED_PATH="$OPTARG" ;;
     *) die "Unknown parameter $opt" ;;
   esac
@@ -19,8 +20,8 @@ done
 
 uploadfile=$(basename "$UPLOADED_PATH")
 uploadfile=$(echo "$uploadfile" | tr -dC 'A-Za-z0-9_.')
-target=${SFTPBRIDGE_UPLOAD_PREFIX}/${uploadfile}
-lock=${LOCKDIR}/$(echo "$target" | base64)
+target=${SFTPBRIDGE_UPLOAD_PREFIX}/${FOLDER_PREFIX}/${uploadfile}
+lock=${LOCKDIR}/$(echo "$target" | base64 -w0)
 
 if  [ -n "$SFTPBRIDGE_UPLOAD_ROLEARN" ] ; then
   assume_args="--role-arn $SFTPBRIDGE_UPLOAD_ROLEARN --role-session-name forward-to-s3 --query Credentials --output text"
@@ -35,11 +36,11 @@ if [ -f $lock ] ; then
   kill $pid || true
   rm $lock
 fi
-trap "rm $lock" SIGTERM SIGINT EXIT
+trap "rm -f $lock" SIGTERM SIGINT EXIT
 echo $$ > $lock
 
 retries=10
-until aws s3 cp "$UPLOADED_PATH" "$target" ; do
+until aws s3 cp --quiet "$UPLOADED_PATH" "$target" ; do
   if (( retries == 0 )) ; then die "Failed to upload $UPLOADED_PATH to $target" ; fi
   retries=$(( retries - 1 ))
   sleep 60
