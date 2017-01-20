@@ -16,13 +16,18 @@ upload-user() {
   install -o ${username} -g ${username} -m 0770 -d /srv/sshd-chroot/${username}/${username}
 }
 
+TMP_INCRONTAB=$(mktemp)
+
 list-userkeys | while read userkey ; do
   username=$(basename ${userkey} .pub)
   id ${username} &> /dev/null || upload-user ${username}
   usermod -a -G ${username} forwarder
-  echo "/srv/sshd-chroot/${username}/${username}/ IN_CLOSE_WRITE /usr/local/bin/forward-to-s3 -f ${username} -p" '$@/$#' | incrontab -u forwarder -
+  echo "/srv/sshd-chroot/${username}/${username}/ IN_CLOSE_WRITE /usr/local/bin/forward-to-s3 -f ${username} -p" '$@/$#' >> $TMP_INCRONTAB
   install -o ${username} -g ${username} -m 0600 /dev/null \
       /etc/ssh/authorized_keys/${username}
   aws s3 cp ${SFTPBRIDGE_USER_PREFIX}/${userkey} - \
       > /etc/ssh/authorized_keys/${username}
 done
+
+incrontab -u forwarder - < $TMP_INCRONTAB
+rm $TMP_INCRONTAB
