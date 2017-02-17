@@ -19,7 +19,7 @@ done
 [ -n "$UPLOADED_PATH" ] || die "Missing parameter -p <uploaded file>"
 
 uploadfile=$(basename "$UPLOADED_PATH")
-uploadfile=$(echo "$uploadfile" | tr -dC '-A-Za-z0-9_.')
+uploadfile=$(echo "$uploadfile" | tr -dC -- '-A-Za-z0-9_.')
 target=${SFTPBRIDGE_UPLOAD_PREFIX}/${FOLDER_PREFIX}/${uploadfile}
 lock=${LOCKDIR}/$(echo "$target" | base64 -w0)
 
