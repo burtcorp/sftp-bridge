@@ -20,9 +20,11 @@ install -m 0755 -o forwarder -g forwarder -d /var/lock/forward-to-s3
 echo "allowed_users = /etc/incron.allow" > /etc/incron.conf
 echo forwarder > /etc/incron.allow
 # Setup sshd
-rm -f /etc/ssh_host_* /etc/sshd_config
+rm -f /etc/ssh/ssh_host_* /etc/sshd_config
 aws s3 cp ${SFTPBRIDGE_CONFIG_PREFIX}/sshd_config /etc/ssh/
 aws s3 sync ${SFTPBRIDGE_CONFIG_PREFIX}/ssh-host-keys/ /etc/ssh/
+chmod go= /etc/ssh/ssh_host_*
+chmod go=r /etc/ssh/ssh_host_*.pub
 mkdir -p /etc/ssh/authorized_keys
 # Environment vars for other scripts
 echo "SFTPBRIDGE_USER_PREFIX=${SFTPBRIDGE_USER_PREFIX}
