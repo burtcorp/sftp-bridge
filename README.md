@@ -29,8 +29,8 @@ Config is read from and files are uploaded to S3 buckets. If you do not already 
 1. Setup your S3 buckets:
 ```
 make install hostkeys userkeys AWS='aws --region us-east-1' \
-  SFTPBRIDGE_CONFIG_PREFIX=s3://config-bucket/sftp-bridge/config/ \
-  SFTPBRIDGE_USER_PREFIX=s3://config-bucket/sftp-bridge/ssh-user-keys/
+  SFTPBRIDGE_CONFIG_PREFIX=s3://config-bucket/sftp-bridge/config \
+  SFTPBRIDGE_USER_PREFIX=s3://config-bucket/sftp-bridge/ssh-user-keys
 ```
 
 ### Manual setup
@@ -50,7 +50,7 @@ ssh ec2-user@<ec2-public-ipv4> export \
 1. Setup your S3 buckets:
 ```
 make install hostkeys AWS='aws --region us-east-1' \
-  SFTPBRIDGE_CONFIG_PREFIX=s3://config-bucket/sftp-bridge/config/
+  SFTPBRIDGE_CONFIG_PREFIX=s3://config-bucket/sftp-bridge/config
 ```
 
 1. Build a stack including an instance (or a launch configuration) with a good userdata section:
